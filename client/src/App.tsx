@@ -1,13 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import reactLogo from './assets/react.svg';
-import { User } from '../../server/server';
+import { AppRouter, User } from '../../server/server';
 import './App.css';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
+
+const trpc = createTRPCProxyClient<AppRouter>({
+    links: [httpLink({ url: 'http://localhost:3000/trpc' })],
+});
 
 function App() {
     const [user, setUser] = useState<User>();
     const [users, setUsers] = useState<User[]>([]);
 
-    useEffect(() => {}, []);
+    useEffect(() => {
+        trpc.userRouter.getUserById.query(1).then(setUser);
+        trpc.userRouter.getAllUsers.query().then(setUsers);
+    }, []);
 
     const firstNameInputRef = useRef<HTMLInputElement | null>(null);
     const lastNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -16,6 +24,13 @@ function App() {
         const firstName = firstNameInputRef.current?.value ?? '';
         const lastName = lastNameInputRef.current?.value ?? '';
         if (!firstName || !lastName) return;
+
+        await trpc.userRouter.createUser.mutate({ firstName, lastName }).then(() => {
+            trpc.userRouter.getAllUsers.query().then(setUsers);
+        });
+
+        if (firstNameInputRef.current) firstNameInputRef.current.value = '';
+        if (lastNameInputRef.current) lastNameInputRef.current.value = '';
     };
 
     return (
