@@ -1,34 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useEffect, useRef, useState } from 'react';
+import reactLogo from './assets/react.svg';
+import { User } from '../../server/server';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [user, setUser] = useState<User>();
+    const [users, setUsers] = useState<User[]>([]);
 
-  return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+    useEffect(() => {}, []);
+
+    const firstNameInputRef = useRef<HTMLInputElement | null>(null);
+    const lastNameInputRef = useRef<HTMLInputElement | null>(null);
+
+    const onCreate = async () => {
+        const firstName = firstNameInputRef.current?.value ?? '';
+        const lastName = lastNameInputRef.current?.value ?? '';
+        if (!firstName || !lastName) return;
+    };
+
+    return (
+        <div className="App">
+            <div>
+                <a href="https://vitejs.dev" target="_blank">
+                    <img src="/vite.svg" className="logo" alt="Vite logo" />
+                </a>
+                <a href="https://reactjs.org" target="_blank">
+                    <img src={reactLogo} className="logo react" alt="React logo" />
+                </a>
+            </div>
+            <h1>{`${user?.firstName} ${user?.lastName}`}</h1>
+            <div className="card">
+                <label htmlFor={'firstName'}>First Name</label>
+                <input id="firstName" ref={firstNameInputRef} />
+                <label htmlFor={'lastName'}>Last Name</label>
+                <input ref={lastNameInputRef} />
+
+                <button onClick={onCreate}>Create User</button>
+            </div>
+            <ul>
+                {users.map((user) => (
+                    <li key={user.id}>{`${user?.firstName} ${user?.lastName}`}</li>
+                ))}
+            </ul>
+        </div>
+    );
 }
 
-export default App
+export default App;
